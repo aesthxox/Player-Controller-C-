@@ -11,7 +11,6 @@ using UnityEngine;
 
     public Vector3 jump;
     public float jumpForce = 2.0f;
-    public bool isGrounded;
 
     Vector3 direction;
     public Rigidbody rb;
@@ -30,12 +29,13 @@ using UnityEngine;
     void Update()
     {
         MyInput();
+
     }
 
     private void FixedUpdate()
     {
         MovePlayer();
-        isGrounded = true;
+
     }
 
     //Key Input
@@ -49,14 +49,33 @@ using UnityEngine;
     private void MovePlayer()
     {
         direction = orientation.forward * verticalInput + orientation.right * horizontalInput;
-        rb.AddForce(direction.normalized * moveSpeed * 10f, ForceMode.Force);
+        rb.AddForce(direction.normalized * moveSpeed * 15f, ForceMode.Force);
+
+        //Running
+        if (Input.GetKeyDown(KeyCode.LeftShift))
+        {
+            rb.AddForce(direction.normalized * moveSpeed * 20f, ForceMode.Force);
+        }
+
+    }
+    public void JumpPlayer()
+    {
 
         // jump controller
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+        if (Input.GetKeyDown(KeyCode.Space))
         {
+            float interactRange = 2f;
+            Collider[] colliderArray = Physics.OverlapSphere(transform.position, interactRange);
+            Debug.Log("Getting COLLIDERS");
+            foreach (Collider collider in colliderArray)
+            {
+                if (collider.TryGetComponent(out floorDetection floorDetection))
+                {
+                    Debug.Log("SPACE BUTTON WORKS");
+                    floorDetection.grounded();
 
-            rb.AddForce(jump * jumpForce, ForceMode.Impulse);
-            isGrounded = false;
+                }
+            }
         }
     }
 }
